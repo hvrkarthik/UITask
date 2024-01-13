@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, Button, TextInput, Modal, ScrollView, StyleSheet } from 'react-native';
+import { Button, Modal, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import OrgHierarchy from './OrgHierarchy';
 
 interface TeamMember {
@@ -15,7 +15,12 @@ const TeamScreen: React.FC = () => {
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
 
-  const addTeamMember = (name: string, id: string, phoneNumber: string, email: string) => {
+  const [name, setName] = useState<string>('');
+  const [id, setId] = useState<string>('');
+  const [phoneNumber, setPhoneNumber] = useState<string>('');
+  const [email, setEmail] = useState<string>('');
+
+  const addTeamMember = () => {
     const newMember: TeamMember = {
       id: teamMembers.length + 1,
       name,
@@ -24,8 +29,14 @@ const TeamScreen: React.FC = () => {
     };
 
     setTeamMembers([...teamMembers, newMember]);
-    setFilteredMembers([...teamMembers, newMember]); 
+    setFilteredMembers([...teamMembers, newMember]);
     setModalVisible(false);
+
+
+    setName('');
+    setId('');
+    setPhoneNumber('');
+    setEmail('');
   };
 
   const filterMembers = (searchText: string) => {
@@ -42,6 +53,34 @@ const TeamScreen: React.FC = () => {
   const openModal = (member: TeamMember | null = null) => {
     setSelectedMember(member);
     setModalVisible(true);
+
+    if (member) {
+      setName(member.name);
+      setId(String(member.id));
+      setPhoneNumber(member.phoneNumber);
+      setEmail(member.email);
+    } else {
+      setName('');
+      setId('');
+      setPhoneNumber('');
+      setEmail('');
+    }
+  };
+
+  const updateTeamMember = (id: number, name: string, phoneNumber: string, email: string) => {
+    const updatedMembers = teamMembers.map((member) =>
+      member.id === id ? { ...member, name, phoneNumber, email } : member
+    );
+
+    setTeamMembers(updatedMembers);
+    setFilteredMembers(updatedMembers);
+  };
+
+  const removeTeamMember = (id: number) => {
+    const updatedMembers = teamMembers.filter((member) => member.id !== id);
+
+    setTeamMembers(updatedMembers);
+    setFilteredMembers(updatedMembers);
   };
 
   return (
@@ -85,18 +124,26 @@ const TeamScreen: React.FC = () => {
             <TextInput
               style={styles.input}
               placeholder="Name"
+              value={name}
+              onChangeText={(text) => setName(text)}
             />
             <TextInput
               style={styles.input}
               placeholder="ID"
+              value={id}
+              onChangeText={(text) => setId(text)}
             />
             <TextInput
               style={styles.input}
               placeholder="Phone Number"
+              value={phoneNumber}
+              onChangeText={(text) => setPhoneNumber(text)}
             />
             <TextInput
               style={styles.input}
               placeholder="Email"
+              value={email}
+              onChangeText={(text) => setEmail(text)}
             />
             <Button
               title={selectedMember ? 'Update Team Member' : 'Add Team Member'}
@@ -104,12 +151,12 @@ const TeamScreen: React.FC = () => {
                 if (selectedMember) {
                   updateTeamMember(
                     selectedMember.id,
-                    'Updated Name',
-                    'Updated Phone Number',
-                    'Updated Email'
+                    name,
+                    phoneNumber,
+                    email
                   );
                 } else {
-                  addTeamMember('New Name', 'New Phone Number', 'New Email');
+                  addTeamMember();
                 }
                 setModalVisible(false);
               }}
@@ -139,23 +186,23 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 16,
     textAlign: 'center',
-    color: '#007BFF', 
+    color: '#007BFF',
   },
   input: {
     marginBottom: 16,
     padding: 10,
     borderWidth: 1,
-    borderColor: '#007BFF', 
+    borderColor: '#007BFF',
     borderRadius: 5,
   },
   addButton: {
-    backgroundColor: '#007BFF', 
+    backgroundColor: '#007BFF',
     padding: 10,
     borderRadius: 5,
     marginBottom: 16,
   },
   addButtonText: {
-    color: '#fff', 
+    color: '#fff',
     textAlign: 'center',
     fontWeight: 'bold',
   },
@@ -163,7 +210,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     padding: 10,
     borderWidth: 1,
-    borderColor: '#ddd', 
+    borderColor: '#ddd',
     borderRadius: 5,
   },
   memberText: {
@@ -185,7 +232,6 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 5,
     marginTop: 16,
-    marginBottom: 20
   },
   modalButtonText: {
     color: '#fff',
@@ -193,5 +239,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 });
+
 
 export default TeamScreen;
